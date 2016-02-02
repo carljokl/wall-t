@@ -17,6 +17,7 @@ package utils.teamcity.wallt.model.configuration;
 
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.SerializedName;
+import javafx.scene.text.FontWeight;
 import utils.teamcity.wallt.controller.api.ApiVersion;
 
 import java.util.List;
@@ -63,6 +64,27 @@ public final class Configuration {
 
     @SerializedName("pref.light.mode")
     private boolean _lightMode;
+
+    @SerializedName("group.by.project")
+    private boolean _groupByProject;
+
+    @SerializedName("pref.tiles.build.title.font.size")
+    private int _tileTitleFontSize = 50;
+
+    @SerializedName("pref.tiles.project.title.font.size")
+    private int _projectTileTitleFontSize = 32;
+
+    @SerializedName("pref.project.title.font.size")
+    private int _projectTitleFontSize = 48;
+
+    @SerializedName("pref.tiles.build.title.font.weight")
+    private int _tileTitleFontWeight = FontWeight.BOLD.getWeight();
+
+    @SerializedName("pref.tiles.project.title.font.weight")
+    private int _projectTileTitleFontWeight = FontWeight.BOLD.getWeight();
+
+    @SerializedName("pref.project.title.font.weight")
+    private int _projectTitleFontWeight = FontWeight.BOLD.getWeight();
 
     @SerializedName("monitored_builds")
     private List<SavedBuildTypeData> _savedBuilds = Lists.newArrayList( );
@@ -140,6 +162,62 @@ public final class Configuration {
 
     public void setLightMode( final boolean lightMode ) {
         _lightMode = lightMode;
+    }
+
+    public boolean isGroupByProject( ) {
+        return _groupByProject;
+    }
+
+    public void setGroupByProject( final boolean groupByProject ) {
+        _groupByProject = groupByProject;
+    }
+
+    public int getTileTitleFontSize( ) {
+        return _tileTitleFontSize;
+    }
+
+    public void setTileTitleFontSize( final int size ) {
+        _tileTitleFontSize = size;
+    }
+
+    public FontWeight getTileTitleFontWeight() {
+        return FontWeight.findByWeight(_tileTitleFontWeight);
+    }
+
+    public void setTileTitleFontWeight( final int weight ) {
+        _tileTitleFontWeight = weight;
+    }
+
+    public int getProjectTileTitleFontSize() {
+        return _projectTileTitleFontSize;
+    }
+
+    public void setProjectTileTitleFontSize( final int size ) {
+        _projectTileTitleFontSize = size;
+    }
+
+    public FontWeight getProjectTileTitleFontWeight() {
+        return FontWeight.findByWeight(_projectTileTitleFontWeight);
+    }
+
+    public void setProjectTitleFontWeight( final int weight ) {
+        _projectTitleFontWeight = weight;
+    }
+
+    public int getProjectTitleFontSize() {
+        return _projectTitleFontSize;
+    }
+
+    public void setProjectTitleFontSize( final int size ) {
+        _projectTitleFontSize = size;
+    }
+
+    public FontWeight getProjectTitleFontWeight() {
+        return FontWeight.findByWeight(_projectTitleFontWeight);
+    }
+
+    public void setProjectTileTitleFontWeight( final int weight ) {
+        _projectTileTitleFontWeight = weight;
     }
 
     public boolean isUseProxy( ) {

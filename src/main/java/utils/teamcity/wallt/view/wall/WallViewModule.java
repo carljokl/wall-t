@@ -23,6 +23,7 @@ import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import javafx.scene.layout.Pane;
 
+import javax.swing.text.View;
 import java.util.Map;
 
 /**
@@ -49,7 +50,7 @@ public final class WallViewModule extends AbstractModule {
 
     @Provides
     @Singleton
-    Map<Class<?>, TileViewProvider> modelToView( ) {
+    Map<Class<?>, TileViewProvider> modelToView() {
         return ImmutableMap.<Class<?>, TileViewProvider>builder( )
                 .put( TileViewModel.class, from -> new TileView( (TileViewModel) from ) )
                 .put( ProjectTileViewModel.class, from -> new ProjectTileView( (ProjectTileViewModel) from ) )

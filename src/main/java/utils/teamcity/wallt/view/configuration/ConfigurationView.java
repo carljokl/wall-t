@@ -159,7 +159,7 @@ final class ConfigurationView extends BorderPane {
         parent.add( lineLabel, 0, 0 );
 
         final TextField lineField = new TextField( );
-        lineField.textProperty( ).bindBidirectional( _model.serverUrlProperty( ) );
+        lineField.textProperty( ).bindBidirectional( _model.serverUrlProperty() );
         lineLabel.setLabelFor( lineField );
         parent.add( lineField, 1, 0, 3, 1 );
     }
@@ -177,7 +177,7 @@ final class ConfigurationView extends BorderPane {
         parent.add( passwordLabel, 2, 1 );
 
         final TextField passwordField = new PasswordField( );
-        passwordField.textProperty( ).bindBidirectional( _model.credentialsPasswordProperty( ) );
+        passwordField.textProperty().bindBidirectional( _model.credentialsPasswordProperty() );
         passwordLabel.setLabelFor( passwordField );
         parent.add( passwordField, 3, 1 );
     }
@@ -198,8 +198,8 @@ final class ConfigurationView extends BorderPane {
                 return ApiVersion.fromName( string );
             }
         } );
-        apiVersionBox.getSelectionModel( ).select( _model.getApiVersion( ) );
-        apiVersionBox.getSelectionModel( ).selectedItemProperty( ).addListener( ( o, oldValue, newValue ) -> _model.requestNewApiVersion( newValue ) );
+        apiVersionBox.getSelectionModel( ).select( _model.getApiVersion() );
+        apiVersionBox.getSelectionModel( ).selectedItemProperty().addListener( ( o, oldValue, newValue ) -> _model.requestNewApiVersion( newValue ) );
         lineLabel.setLabelFor( apiVersionBox );
         parent.add( apiVersionBox, 1, 2 );
     }
@@ -207,7 +207,7 @@ final class ConfigurationView extends BorderPane {
 
     private void proxyConfigurationLine( final GridPane grid ) {
         final CheckBox useProxyCheckbox = new CheckBox( "Use HTTP Proxy" );
-        useProxyCheckbox.selectedProperty( ).bindBidirectional( _model.proxyUseProperty( ) );
+        useProxyCheckbox.selectedProperty( ).bindBidirectional( _model.proxyUseProperty() );
 
         grid.add( useProxyCheckbox, 2, 2 );
     }
@@ -249,7 +249,7 @@ final class ConfigurationView extends BorderPane {
         parent.add( lineLabel, 0, 0 );
 
         final TextField lineField = new TextField( );
-        lineField.textProperty( ).bindBidirectional( _model.proxyServerUrlProperty( ) );
+        lineField.textProperty( ).bindBidirectional( _model.proxyServerUrlProperty() );
         lineLabel.setLabelFor( lineField );
         parent.add( lineField, 1, 0 );
 
@@ -257,11 +257,11 @@ final class ConfigurationView extends BorderPane {
         parent.add( portLabel, 2, 0 );
 
         final TextField portField = new TextField( );
-        portField.textProperty( ).addListener( ( o, oldValue, newValue ) -> {
+        portField.textProperty().addListener( ( o, oldValue, newValue ) -> {
             if ( !oldValue.equals( newValue ) )
-                portField.textProperty( ).setValue( newValue.replaceAll( "[^0-9]", "" ) );
+                portField.textProperty().setValue( newValue.replaceAll( "[^0-9]", "" ) );
         } );
-        portField.textProperty( ).bindBidirectional( _model.proxyServerPortProperty( ) );
+        portField.textProperty().bindBidirectional( _model.proxyServerPortProperty() );
         portLabel.setLabelFor( portField );
         parent.add( portField, 3, 0 );
     }
@@ -271,7 +271,7 @@ final class ConfigurationView extends BorderPane {
         parent.add( lineLabel, 0, 1 );
 
         final TextField lineField = new TextField( );
-        lineField.textProperty( ).bindBidirectional( _model.proxyCredentialsUserProperty( ) );
+        lineField.textProperty( ).bindBidirectional( _model.proxyCredentialsUserProperty() );
         lineLabel.setLabelFor( lineField );
         parent.add( lineField, 1, 1 );
 
@@ -279,7 +279,7 @@ final class ConfigurationView extends BorderPane {
         parent.add( passwordLabel, 2, 1 );
 
         final TextField passwordField = new PasswordField( );
-        passwordField.textProperty( ).bindBidirectional( _model.proxyCredentialsPasswordProperty( ) );
+        passwordField.textProperty().bindBidirectional( _model.proxyCredentialsPasswordProperty() );
         passwordLabel.setLabelFor( passwordField );
         parent.add( passwordField, 3, 1 );
     }
@@ -292,27 +292,27 @@ final class ConfigurationView extends BorderPane {
 
         final ProgressIndicator indicator = new ProgressIndicator( );
         indicator.setPrefSize( 20, 20 );
-        indicator.visibleProperty( ).bind( _model.loadingProperty( ) );
+        indicator.visibleProperty( ).bind( _model.loadingProperty() );
 
         final Label connectionInformation = new Label( );
         connectionInformation.setTextAlignment( TextAlignment.CENTER );
         connectionInformation.setWrapText( true );
-        connectionInformation.textProperty( ).bind( _model.loadingInformationProperty( ) );
-        connectionInformation.visibleProperty( ).bind( _model.loadingInformationProperty( ).isEmpty( ).not( ) );
-        connectionInformation.textFillProperty( ).bind( Bindings.<Paint>createObjectBinding( ( ) -> {
-            if ( _model.loadingProperty( ).get( ) )
+        connectionInformation.textProperty( ).bind( _model.loadingInformationProperty() );
+        connectionInformation.visibleProperty( ).bind( _model.loadingInformationProperty().isEmpty().not() );
+        connectionInformation.textFillProperty().bind( Bindings.<Paint>createObjectBinding( () -> {
+            if ( _model.loadingProperty().get() )
                 return Paint.valueOf( "black" );
-            return _model.isLoadingFailure( ) ? Paint.valueOf( "red" ) : Paint.valueOf( "green" );
-        }, _model.loadingFailureProperty( ), _model.loadingProperty( ) ) );
+            return _model.isLoadingFailure() ? Paint.valueOf( "red" ) : Paint.valueOf( "green" );
+        }, _model.loadingFailureProperty(), _model.loadingProperty() ) );
 
-        connectionInformation.minHeightProperty( ).bind( createIntegerBinding( ( ) -> {
-            if ( _model.loadingInformationProperty( ).isEmpty( ).get( ) ) {
+        connectionInformation.minHeightProperty().bind( createIntegerBinding( () -> {
+            if ( _model.loadingInformationProperty().isEmpty().get() ) {
                 return 0;
             } else {
                 return 50;
             }
-        }, _model.loadingInformationProperty( ) ) );
-        connectionInformation.maxHeightProperty( ).bind( connectionInformation.minHeightProperty( ) );
+        }, _model.loadingInformationProperty() ) );
+        connectionInformation.maxHeightProperty( ).bind( connectionInformation.minHeightProperty() );
 
         container.getChildren( ).addAll( indicator, connectionInformation );
         return container;
@@ -327,16 +327,23 @@ final class ConfigurationView extends BorderPane {
         grid.setVgap( 20 );
 
         lightModeCheckBox( grid );
+        groupByProjectCheckBox( grid );
         nbTilesByColumnComboBox( grid );
         nbTilesByRowComboBox( grid );
+        tileTitleFontSizeComboBox( grid );
+        tileTitleFontWeightComboBox( grid );
+        projectTileTitleFontSizeComboBox( grid );
+        projectTileTitleFontWeightComboBox( grid );
+        projectTitleFontSizeComboBox( grid );
+        projectTitleFontWeightComboBox( grid );
 
         final ColumnConstraints noConstraint = new ColumnConstraints( );
         final ColumnConstraints rightAlignementConstraint = new ColumnConstraints( );
         rightAlignementConstraint.setHalignment( HPos.RIGHT );
-        grid.getColumnConstraints( ).add( rightAlignementConstraint );
-        grid.getColumnConstraints( ).add( noConstraint );
-        grid.getColumnConstraints( ).add( rightAlignementConstraint );
-        grid.getColumnConstraints( ).add( noConstraint );
+        grid.getColumnConstraints().add( rightAlignementConstraint );
+        grid.getColumnConstraints().add( noConstraint );
+        grid.getColumnConstraints().add( rightAlignementConstraint );
+        grid.getColumnConstraints().add( noConstraint );
 
         grid.setStyle( "-fx-border-color:white; -fx-border-radius:5;" );
 
@@ -353,13 +360,23 @@ final class ConfigurationView extends BorderPane {
         parent.add( lightModeCheckbox, 1, 0 );
     }
 
+    private void groupByProjectCheckBox( final GridPane parent ) {
+        final Label lineLabel = new Label( "Group by project:" );
+        parent.add( lineLabel, 2, 0 );
+
+        final CheckBox groupByProjectCheckbox = new CheckBox( );
+        groupByProjectCheckbox.selectedProperty( ).bindBidirectional( _model.groupByProjectProperty() );
+        lineLabel.setLabelFor( groupByProjectCheckbox );
+        parent.add( groupByProjectCheckbox, 3, 0 );
+    }
+
     private void nbTilesByColumnComboBox( final GridPane parent ) {
         final Label lineLabel = new Label( "Max tiles by column:" );
         parent.add( lineLabel, 0, 1 );
 
         final ComboBox<Integer> comboBox = new ComboBox<>( FXCollections.observableArrayList( 2, 3, 4, 5, 6, 7, 8 ) );
         comboBox.getSelectionModel( ).select( (Integer) _model.maxTilesByColumnProperty( ).get( ) );
-        comboBox.getSelectionModel( ).selectedItemProperty( ).addListener( ( o, oldValue, newValue ) -> _model.maxTilesByColumnProperty( ).setValue( newValue ) );
+        comboBox.getSelectionModel( ).selectedItemProperty().addListener( ( o, oldValue, newValue ) -> _model.maxTilesByColumnProperty().setValue( newValue ) );
         lineLabel.setLabelFor( comboBox );
         parent.add( comboBox, 1, 1 );
     }
@@ -369,10 +386,76 @@ final class ConfigurationView extends BorderPane {
         parent.add( lineLabel, 2, 1 );
 
         final ComboBox<Integer> comboBox = new ComboBox<>( FXCollections.observableArrayList( 2, 3, 4, 5, 6, 7, 8 ) );
-        comboBox.getSelectionModel( ).select( (Integer) _model.maxTilesByRowProperty( ).get( ) );
-        comboBox.getSelectionModel( ).selectedItemProperty( ).addListener( ( o, oldValue, newValue ) -> _model.maxTilesByRowProperty( ).setValue( newValue ) );
+        comboBox.getSelectionModel().select( (Integer) _model.maxTilesByRowProperty().get() );
+        comboBox.getSelectionModel( ).selectedItemProperty().addListener( ( o, oldValue, newValue ) -> _model.maxTilesByRowProperty().setValue( newValue ) );
         lineLabel.setLabelFor( comboBox );
         parent.add( comboBox, 3, 1 );
+    }
+
+    private void tileTitleFontSizeComboBox( final GridPane parent ) {
+        final Label lineLabel = new Label( "Tile title font size:" );
+        parent.add( lineLabel, 0, 2 );
+
+        final ComboBox<Integer> comboBox = new ComboBox<>( FXCollections.observableArrayList( 20, 24, 28, 32, 40, 42, 44, 46, 50, 56 ) );
+        comboBox.getSelectionModel().select( (Integer) _model.tileTitleFontSize().get() );
+        comboBox.getSelectionModel( ).selectedItemProperty().addListener( ( o, oldValue, newValue ) -> _model.tileTitleFontSize().setValue( newValue ) );
+        lineLabel.setLabelFor( comboBox );
+        parent.add( comboBox, 1, 2 );
+    }
+
+    private void projectTileTitleFontSizeComboBox( final GridPane parent ) {
+        final Label lineLabel = new Label( "Project Tile title font size:" );
+        parent.add( lineLabel, 0, 3 );
+
+        final ComboBox<Integer> comboBox = new ComboBox<>( FXCollections.observableArrayList( 24, 28, 30, 32, 36, 40, 48 ) );
+        comboBox.getSelectionModel( ).select( (Integer) _model.projectTileTitleFontSize().get( ) );
+        comboBox.getSelectionModel( ).selectedItemProperty().addListener( ( o, oldValue, newValue ) -> _model.projectTileTitleFontSize().setValue( newValue ) );
+        lineLabel.setLabelFor( comboBox );
+        parent.add( comboBox, 1, 3 );
+    }
+
+    private void projectTitleFontSizeComboBox( final GridPane parent ) {
+        final Label lineLabel = new Label( "Project title font size:" );
+        parent.add( lineLabel, 0, 4 );
+
+        final ComboBox<Integer> comboBox = new ComboBox<>( FXCollections.observableArrayList( 24, 30, 32, 36, 40, 48, 50, 54 ) );
+        comboBox.getSelectionModel( ).select( (Integer) _model.projectTitleFontSize().get( ) );
+        comboBox.getSelectionModel( ).selectedItemProperty().addListener( ( o, oldValue, newValue ) -> _model.projectTitleFontSize().setValue( newValue ) );
+        lineLabel.setLabelFor( comboBox );
+        parent.add( comboBox, 1, 4 );
+    }
+
+    private void tileTitleFontWeightComboBox( final GridPane parent ) {
+        final Label lineLabel = new Label( "Tile title font Weight:" );
+        parent.add( lineLabel, 2, 2 );
+
+        final ComboBox<FontWeight> comboBox = new ComboBox<>( FXCollections.observableArrayList( FontWeight.LIGHT, FontWeight.NORMAL, FontWeight.BOLD) );
+        comboBox.getSelectionModel( ).select( _model.tileTitleFontWeight( ).get( ) );
+        comboBox.getSelectionModel( ).selectedItemProperty().addListener( ( o, oldValue, newValue ) -> _model.tileTitleFontWeight().setValue( newValue ) );
+        lineLabel.setLabelFor( comboBox );
+        parent.add( comboBox, 3, 2 );
+    }
+
+    private void projectTileTitleFontWeightComboBox( final GridPane parent ) {
+        final Label lineLabel = new Label( "Project Tile title font weight:" );
+        parent.add( lineLabel, 2, 3 );
+
+        final ComboBox<FontWeight> comboBox = new ComboBox<>( FXCollections.observableArrayList( FontWeight.LIGHT, FontWeight.NORMAL, FontWeight.BOLD) );
+        comboBox.getSelectionModel( ).select( _model.projectTileTitleFontWeight().get() );
+        comboBox.getSelectionModel( ).selectedItemProperty().addListener( ( o, oldValue, newValue ) -> _model.projectTileTitleFontWeight().setValue( newValue ) );
+        lineLabel.setLabelFor( comboBox );
+        parent.add( comboBox, 3, 3 );
+    }
+
+    private void projectTitleFontWeightComboBox( final GridPane parent ) {
+        final Label lineLabel = new Label( "Project title font weight:" );
+        parent.add( lineLabel, 2, 4 );
+
+        final ComboBox<FontWeight> comboBox = new ComboBox<>( FXCollections.observableArrayList( FontWeight.LIGHT, FontWeight.NORMAL, FontWeight.BOLD) );
+        comboBox.getSelectionModel( ).select( _model.projectTitleFontWeight().get() );
+        comboBox.getSelectionModel( ).selectedItemProperty().addListener( ( o, oldValue, newValue ) -> _model.projectTitleFontWeight().setValue( newValue ) );
+        lineLabel.setLabelFor( comboBox );
+        parent.add( comboBox, 3, 4 );
     }
 
 

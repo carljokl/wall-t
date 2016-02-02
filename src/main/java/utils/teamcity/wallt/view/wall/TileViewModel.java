@@ -22,6 +22,7 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
+import javafx.scene.text.FontWeight;
 import utils.teamcity.wallt.model.build.BuildData;
 import utils.teamcity.wallt.model.build.BuildState;
 import utils.teamcity.wallt.model.build.BuildTypeData;
@@ -51,11 +52,14 @@ final class TileViewModel {
     private final ObjectProperty<LocalDateTime> _lastFinishedDate = new SimpleObjectProperty<>( );
     private final ObjectProperty<Duration> _timeLeft = new SimpleObjectProperty<>( Duration.ZERO );
     private final StringProperty _displayedName = new SimpleStringProperty( );
+    private final StringProperty _parentName = new SimpleStringProperty( );
     private final ObjectProperty<Image> _image = new SimpleObjectProperty<>( );
     private final ObjectProperty<Background> _background = new SimpleObjectProperty<>( );
     private final ObjectProperty<Background> _runningBackground = new SimpleObjectProperty<>( );
 
     private final BooleanProperty _lightMode = new SimpleBooleanProperty( );
+
+    private final ViewConfig _viewConfig;
 
     interface Factory {
         TileViewModel forBuildTypeData( final BuildTypeData buildTypeData );
@@ -64,8 +68,18 @@ final class TileViewModel {
     @Inject
     TileViewModel( final Configuration configuration, @Assisted final BuildTypeData buildTypeData ) {
         _buildTypeData = buildTypeData;
+        _viewConfig = toViewConfig( configuration );
         updateConfiguration( configuration );
         updateTileViewModel( buildTypeData );
+    }
+
+    private ViewConfig toViewConfig(Configuration configuration) {
+        return new ViewConfig(configuration.getTileTitleFontSize(),
+                              configuration.getTileTitleFontWeight());
+    }
+
+    public ViewConfig getViewConfig() {
+        return _viewConfig;
     }
 
     @Subscribe
@@ -75,6 +89,7 @@ final class TileViewModel {
 
         Platform.runLater( ( ) -> {
             _displayedName.set( Strings.isNullOrEmpty( data.getAliasName( ) ) ? data.getName( ) : data.getAliasName( ) );
+            _parentName.set( Strings.isNullOrEmpty( data.getProjectName() ) ? "" : data.getProjectName() );
             _running.setValue( data.hasRunningBuild( ) );
             _queued.setValue( data.isQueued( ) );
 
@@ -90,6 +105,8 @@ final class TileViewModel {
     public void updateConfiguration( final Configuration configuration ) {
         Platform.runLater( ( ) -> {
             _lightMode.setValue( configuration.isLightMode( ) );
+            _viewConfig.fontSize( ).setValue( configuration.getTileTitleFontSize() );
+            _viewConfig.fontWeight( ).setValue( configuration.getTileTitleFontWeight( ) );
         } );
     }
 
@@ -221,6 +238,8 @@ final class TileViewModel {
     String getDisplayedName( ) {
         return _displayedName.get( );
     }
+
+    String getParentName( ) { return _parentName.get( ); }
 
     StringProperty displayedNameProperty( ) {
         return _displayedName;

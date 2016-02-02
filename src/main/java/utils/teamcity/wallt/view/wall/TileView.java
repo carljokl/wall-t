@@ -47,7 +47,7 @@ final class TileView extends StackPane {
     private final TileViewModel _model;
     private final FadeTransition _runningAnimation;
 
-    TileView( final TileViewModel build ) {
+    TileView( final TileViewModel build) {
         _model = build;
 
         setAlignment( CENTER_LEFT );
@@ -89,7 +89,8 @@ final class TileView extends StackPane {
         tileContent.setAlignment( CENTER_LEFT );
 
         final Label tileTitle = new Label( );
-        tileTitle.setFont( UIUtils.font( 50, FontWeight.BOLD ) );
+        final ViewConfig config = _model.getViewConfig();
+        tileTitle.setFont( UIUtils.font( config.fontSize( ).get( ), config.fontWeight( ).get( ) ) );
         tileTitle.setTextFill( Color.WHITE );
         tileTitle.setPadding( new Insets( 5 ) );
         tileTitle.setWrapText( true );

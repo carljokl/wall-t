@@ -25,6 +25,7 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.text.FontWeight;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.teamcity.wallt.controller.api.ApiVersion;
@@ -67,6 +68,14 @@ final class ConfigurationViewModel {
     private final IntegerProperty _maxTilesByColumn = new SimpleIntegerProperty( );
     private final IntegerProperty _maxTilesByRow = new SimpleIntegerProperty( );
     private final BooleanProperty _lightMode = new SimpleBooleanProperty( );
+    private final BooleanProperty _groupByProject = new SimpleBooleanProperty( );
+
+    private final IntegerProperty _tileTitleFontSize = new SimpleIntegerProperty( );
+    private final IntegerProperty _projectTileTitleFontSize = new SimpleIntegerProperty( );
+    private final IntegerProperty _projectTitleFontSize = new SimpleIntegerProperty( );
+    private final ObjectProperty<FontWeight> _tileTitleFontWeight = new SimpleObjectProperty<>( );
+    private final ObjectProperty<FontWeight> _projectTileTitleFontWeight = new SimpleObjectProperty<>( );
+    private final ObjectProperty<FontWeight> _projectTitleFontWeight = new SimpleObjectProperty<>( );
 
     private final BooleanProperty _loading = new SimpleBooleanProperty( );
     private final BooleanProperty _loadingFailure = new SimpleBooleanProperty( true );
@@ -93,60 +102,81 @@ final class ConfigurationViewModel {
 
         _proxyUse.setValue( _configuration.isUseProxy( ) );
         _proxyUse.addListener( ( o, oldValue, newValue ) -> {
-            invalidateConnectInformation( );
+            invalidateConnectInformation();
             configuration.setUseProxy( newValue );
         } );
 
-        _proxyServerUrl.setValue( _configuration.getProxyHost( ) );
+        _proxyServerUrl.setValue( _configuration.getProxyHost() );
         _proxyServerUrl.addListener( ( o, oldValue, newValue ) -> {
-            invalidateConnectInformation( );
+            invalidateConnectInformation();
             configuration.setProxyHost( newValue );
         } );
 
-        _proxyServerPort.setValue( String.valueOf( _configuration.getProxyPort( ) ) );
+        _proxyServerPort.setValue( String.valueOf( _configuration.getProxyPort() ) );
         _proxyServerPort.addListener( ( o, oldValue, newValue ) -> {
-            invalidateConnectInformation( );
+            invalidateConnectInformation();
             configuration.setProxyPort( Integer.valueOf( newValue ) );
         } );
 
-        _proxyCredentialsUser.setValue( _configuration.getProxyCredentialsUser( ) );
+        _proxyCredentialsUser.setValue( _configuration.getProxyCredentialsUser() );
         _proxyCredentialsUser.addListener( ( o, oldValue, newValue ) -> {
-            invalidateConnectInformation( );
+            invalidateConnectInformation();
             configuration.setProxyCredentialsUser( newValue );
         } );
 
-        _proxyCredentialsPassword.setValue( _configuration.getProxyCredentialsPassword( ) );
+        _proxyCredentialsPassword.setValue( _configuration.getProxyCredentialsPassword() );
         _proxyCredentialsPassword.addListener( ( o, oldValue, newValue ) -> {
-            invalidateConnectInformation( );
+            invalidateConnectInformation();
             configuration.setProxyCredentialsPassword( newValue );
         } );
 
-        _serverUrl.setValue( configuration.getServerUrl( ) );
+        _serverUrl.setValue( configuration.getServerUrl() );
         _serverUrl.addListener( ( object, oldValue, newValue ) -> {
-            invalidateConnectInformation( );
+            invalidateConnectInformation();
             configuration.setServerUrl( newValue );
         } );
 
-        _credentialsUser.setValue( configuration.getCredentialsUser( ) );
+        _credentialsUser.setValue( configuration.getCredentialsUser() );
         _credentialsUser.addListener( ( object, oldValue, newValue ) -> {
-            invalidateConnectInformation( );
+            invalidateConnectInformation();
             configuration.setCredentialsUser( newValue );
         } );
 
-        _credentialsPassword.setValue( configuration.getCredentialsPassword( ) );
+        _credentialsPassword.setValue( configuration.getCredentialsPassword() );
         _credentialsPassword.addListener( ( object, oldValue, newValue ) -> {
-            invalidateConnectInformation( );
+            invalidateConnectInformation();
             configuration.setCredentialsPassword( newValue );
         } );
 
-        _maxTilesByColumn.setValue( configuration.getMaxTilesByColumn( ) );
+        _maxTilesByColumn.setValue( configuration.getMaxTilesByColumn() );
         _maxTilesByColumn.addListener( ( object, oldValue, newValue ) -> configuration.setMaxTilesByColumn( newValue.intValue( ) ) );
 
-        _maxTilesByRow.setValue( configuration.getMaxTilesByRow( ) );
+        _maxTilesByRow.setValue( configuration.getMaxTilesByRow() );
         _maxTilesByRow.addListener( ( object, oldValue, newValue ) -> configuration.setMaxTilesByRow( newValue.intValue( ) ) );
 
-        _lightMode.setValue( configuration.isLightMode( ) );
+        _lightMode.setValue( configuration.isLightMode() );
         _lightMode.addListener( ( object, oldValue, newValue ) -> configuration.setLightMode( newValue ) );
+
+        _groupByProject.setValue( configuration.isGroupByProject() );
+        _groupByProject.addListener( ( object, oldValue, newValue ) -> configuration.setGroupByProject( newValue ) );
+
+        _tileTitleFontSize.setValue( configuration.getTileTitleFontSize() );
+        _tileTitleFontSize.addListener( ( object, oldValue, newValue ) -> configuration.setTileTitleFontSize( newValue.intValue() ) );
+
+        _tileTitleFontWeight.setValue( configuration.getTileTitleFontWeight() );
+        _tileTitleFontWeight.addListener( ( object, oldValue, newValue ) -> configuration.setTileTitleFontWeight( newValue.getWeight() ) );
+
+        _projectTileTitleFontSize.setValue( configuration.getProjectTileTitleFontSize() );
+        _projectTileTitleFontSize.addListener( ( object, oldValue, newValue ) -> configuration.setProjectTileTitleFontSize( newValue.intValue() ) );
+
+        _projectTileTitleFontWeight.setValue( configuration.getProjectTileTitleFontWeight() );
+        _projectTileTitleFontWeight.addListener( ( object, oldValue, newValue ) -> configuration.setProjectTileTitleFontWeight( newValue.getWeight() ) );
+
+        _projectTitleFontSize.setValue( configuration.getProjectTitleFontSize() );
+        _projectTitleFontSize.addListener( ( object, oldValue, newValue ) -> configuration.setProjectTitleFontSize( newValue.intValue() ) );
+
+        _projectTitleFontWeight.setValue( configuration.getProjectTitleFontWeight( )  );
+        _projectTitleFontWeight.addListener( ( object, oldValue, newValue ) -> configuration.setProjectTitleFontWeight( newValue.getWeight() ) );
 
         updateBuildTypeList( buildManager );
         updateProjectList( projectManager );
@@ -214,6 +244,34 @@ final class ConfigurationViewModel {
 
     BooleanProperty lightModeProperty( ) {
         return _lightMode;
+    }
+
+    BooleanProperty groupByProjectProperty( ) {
+        return _groupByProject;
+    }
+
+    IntegerProperty tileTitleFontSize( ) {
+        return _tileTitleFontSize;
+    }
+
+    ObjectProperty<FontWeight> tileTitleFontWeight( ) {
+        return _tileTitleFontWeight;
+    }
+
+    IntegerProperty projectTileTitleFontSize( ) {
+        return _projectTileTitleFontSize;
+    }
+
+    ObjectProperty<FontWeight> projectTileTitleFontWeight() {
+        return _projectTileTitleFontWeight;
+    }
+
+    IntegerProperty projectTitleFontSize( ) {
+        return _projectTitleFontSize;
+    }
+
+    ObjectProperty<FontWeight> projectTitleFontWeight() {
+        return _projectTitleFontWeight;
     }
 
     ObservableList<BuildTypeViewModel> getBuildTypes( ) {

@@ -18,7 +18,9 @@ package utils.teamcity.wallt.view.wall;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -47,6 +49,10 @@ final class WallViewModel {
     private final IntegerProperty _maxTilesByColumn = new SimpleIntegerProperty( );
     private final IntegerProperty _maxTilesByRow = new SimpleIntegerProperty( );
 
+    private final BooleanProperty _projectPerWall = new SimpleBooleanProperty( );
+
+    private final ViewConfig _viewConfig = new ViewConfig( );
+
     @Inject
     WallViewModel( final EventBus eventBus, final Configuration configuration, final IBuildTypeManager buildManager, final IProjectManager projectManager, final TileViewModel.Factory tileViewModeFactory, final ProjectTileViewModel.Factory projectTileViewModeFactory ) {
         _eventBus = eventBus;
@@ -59,11 +65,11 @@ final class WallViewModel {
 
     @Subscribe
     public void updateBuildList( final IBuildTypeManager buildManager ) {
-        Platform.runLater( ( ) -> {
+        Platform.runLater( () -> {
             _displayedBuilds.forEach( _eventBus::unregister );
-            _displayedBuilds.setAll( (List<TileViewModel>) buildManager.getMonitoredBuildTypes( ).stream( )
+            _displayedBuilds.setAll( (List<TileViewModel>) buildManager.getMonitoredBuildTypes().stream()
                     .map( _tileViewModeFactory::forBuildTypeData )
-                    .collect( Collectors.toList( ) ) );
+                    .collect( Collectors.toList() ) );
             _displayedBuilds.forEach( _eventBus::register );
         } );
     }
@@ -72,7 +78,7 @@ final class WallViewModel {
     public void updateProjectList( final IProjectManager projectManager ) {
         Platform.runLater( ( ) -> {
             _displayedProjects.forEach( _eventBus::unregister );
-            _displayedProjects.setAll( (List<ProjectTileViewModel>) projectManager.getMonitoredProjects( ).stream( )
+            _displayedProjects.setAll( (List<ProjectTileViewModel>) projectManager.getMonitoredProjects().stream( )
                     .map( _projectTileViewModeFactory::forProjectData )
                     .collect( Collectors.toList( ) ) );
             _displayedProjects.forEach( _eventBus::register );
@@ -83,12 +89,19 @@ final class WallViewModel {
     public void updateConfiguration( final Configuration configuration ) {
         Platform.runLater( ( ) -> {
             _maxTilesByColumn.setValue( configuration.getMaxTilesByColumn( ) );
-            _maxTilesByRow.setValue( configuration.getMaxTilesByRow( ) );
+            _maxTilesByRow.setValue( configuration.getMaxTilesByRow() );
+            _projectPerWall.setValue( configuration.isGroupByProject() );
+            _viewConfig.fontSize( ).set( configuration.getProjectTitleFontSize() );
+            _viewConfig.fontWeight( ).set( configuration.getProjectTitleFontWeight() );
         } );
     }
 
     public ObservableList<TileViewModel> getDisplayedBuilds( ) {
         return _displayedBuilds;
+    }
+
+    public ViewConfig getViewConfig() {
+        return _viewConfig;
     }
 
     ObservableList<ProjectTileViewModel> getDisplayedProjects( ) {
@@ -102,6 +115,8 @@ final class WallViewModel {
     public IntegerProperty getMaxTilesByRowProperty( ) {
         return _maxTilesByRow;
     }
+
+    public BooleanProperty isProjectPerWallProperty( ) { return _projectPerWall; }
 
     @Inject
     public void registerToEventBus( final EventBus eventBus ) {

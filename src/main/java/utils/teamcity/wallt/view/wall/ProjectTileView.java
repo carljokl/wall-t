@@ -136,8 +136,10 @@ final class ProjectTileView extends HBox {
         background.setPreserveRatio( true );
         background.setFitHeight( 70 );
 
+        final ViewConfig config = _model.getViewConfig();
+
         final Label label = new Label( "8" );
-        label.setFont( UIUtils.font( 32, FontWeight.BOLD ) );
+        label.setFont( UIUtils.font( config.fontSize( ).get( ), config.fontWeight( ).get( ) ) );
         label.setTextFill( Color.WHITE );
         label.setEffect( UIUtils.shadowEffect( ) );
         label.textProperty( ).bind( _model.successCountProperty( ).asString( ) );
@@ -151,8 +153,10 @@ final class ProjectTileView extends HBox {
         background.setPreserveRatio( true );
         background.setFitHeight( 70 );
 
+        final ViewConfig config = _model.getViewConfig();
+
         final Label label = new Label( );
-        label.setFont( UIUtils.font( 32, FontWeight.BOLD ) );
+        label.setFont( UIUtils.font( config.fontSize( ).get( ), config.fontWeight( ).get( ) ) );
         label.setTextFill( Color.WHITE );
         label.setEffect( UIUtils.shadowEffect( ) );
         label.textProperty( ).bind( _model.failureCountProperty( ).asString( ) );

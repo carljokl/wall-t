@@ -50,6 +50,7 @@ final class ProjectTileViewModel {
     private final BooleanProperty _hasFailureRunning = new SimpleBooleanProperty( );
 
     private final BooleanProperty _lightMode = new SimpleBooleanProperty( );
+    private final ViewConfig _viewConfig;
 
 
     interface Factory {
@@ -60,8 +61,18 @@ final class ProjectTileViewModel {
     ProjectTileViewModel( final Configuration configuration, final IProjectManager projectManager, @Assisted final ProjectData projectData ) {
         _projectManager = projectManager;
         _projectData = projectData;
+        _viewConfig = toViewConfig( configuration );
         updateConfiguration( configuration );
         updateProjectViewModel( projectData );
+    }
+
+    private ViewConfig toViewConfig(Configuration configuration) {
+        return new ViewConfig(configuration.getProjectTileTitleFontSize(),
+                              configuration.getProjectTileTitleFontWeight());
+    }
+
+    public ViewConfig getViewConfig() {
+        return _viewConfig;
     }
 
     @Subscribe

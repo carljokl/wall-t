@@ -15,7 +15,10 @@
 
 package utils.teamcity.wallt.view.wall;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
@@ -56,6 +59,8 @@ final class WallView extends StackPane {
 
         _model.getMaxTilesByColumnProperty( ).addListener( ( o, oldValue, newalue ) -> updateLayout( ) );
         _model.getMaxTilesByRowProperty( ).addListener( ( o, oldValue, newalue ) -> updateLayout( ) );
+
+        _model.isProjectPerWallProperty( ).addListener( ( o, oldValue, newValue ) -> updateLayout() );
 
         final Timer screenAnimationTimer = new Timer( "WallView Screen switcher", true );
         screenAnimationTimer.scheduleAtFixedRate( new TimerTask( ) {
@@ -107,24 +112,62 @@ final class WallView extends StackPane {
         final int nbColums = max( 1, byScreen / maxTilesByColumn + ( ( byScreen % maxTilesByColumn > 0 ? 1 : 0 ) ) );
         final int byColums = max( 1, byScreen / nbColums + ( ( byScreen % nbColums > 0 ? 1 : 0 ) ) );
 
-        final Iterable<List<Object>> screenPartition = Iterables.partition( Iterables.concat( builds, projects ), byScreen );
-        for ( final List<Object> buildsInScreen : screenPartition ) {
-            final GridPane screenPane = buildScreenPane( buildsInScreen, nbColums, byColums );
-            screenPane.setVisible( false );
-            getChildren( ).add( screenPane );
-        }
+        divideByScreen( builds, projects, byScreen, nbColums, byColums );
 
         displayNextScreen( );
     }
 
-    private GridPane buildScreenPane( final Iterable<Object> buildsInScreen, final int nbColums, final int byColums ) {
+    private void divideByScreen( final Collection<TileViewModel> builds,
+                                 final Collection<ProjectTileViewModel> projects,
+                                 final int maxTilesPerScreen,
+                                 final int nbColumns,
+                                 final int byColumns ) {
+        if ( _model.isProjectPerWallProperty( ).get( ) ) {
+            // Could be optimised but splits into screens by project. Project may span multiple screens.
+            final Map<String, Collection<Object>> buildsByProject = Maps.newHashMap();
+            for ( TileViewModel build : builds) {
+                final String project = build.getBuildTypeData( ).getProjectName( );
+                if ( buildsByProject.containsKey( project ) ) {
+                    buildsByProject.get( project ).add( build );
+                }
+                else {
+                    final Collection<Object> buildsInProject = Lists.newArrayList( build );
+                    buildsByProject.put( project, buildsInProject );
+                }
+            }
+            for ( String project : buildsByProject.keySet() ) {
+                final Iterable<List<Object>> projectPartition = Iterables.partition( buildsByProject.get( project ),
+                                                                                     maxTilesPerScreen );
+                for (List<Object> buildsInScreen : projectPartition) {
+                    final GridPane screenPane = buildProjectScreenPane( project, buildsInScreen, nbColumns, byColumns );
+                    screenPane.setVisible( false );
+                    getChildren( ).add( screenPane );
+                }
+            }
+        }
+        else {
+            final Iterable<List<Object>> screenPartition = Iterables.partition( Iterables.concat( builds, projects ), maxTilesPerScreen );
+            for ( final List<Object> buildsInScreen : screenPartition ) {
+                final GridPane screenPane = buildScreenPane( buildsInScreen, nbColumns, byColumns );
+                screenPane.setVisible( false );
+                getChildren( ).add( screenPane );
+            }
+        }
+    }
+
+
+    private GridPane buildCommonScreenPane( ) {
         final GridPane screenPane = new GridPane( );
         screenPane.setHgap( GAP_SPACE );
         screenPane.setVgap( GAP_SPACE );
         screenPane.setPadding( new Insets( GAP_SPACE ) );
         screenPane.setStyle( "-fx-background-color:black;" );
         screenPane.setAlignment( Pos.CENTER );
+        return screenPane;
+    }
 
+    private GridPane buildScreenPane( final Iterable<Object> buildsInScreen, final int nbColums, final int byColums ) {
+        final GridPane screenPane = buildCommonScreenPane();
         final Iterable<List<Object>> partition = Iterables.paddedPartition( buildsInScreen, byColums );
         for ( int x = 0; x < nbColums; x++ ) {
             final List<Object> buildList = x < size( partition ) ? Iterables.get( partition, x ) : Collections.emptyList( );
@@ -143,6 +186,39 @@ final class WallView extends StackPane {
         }
 
         return screenPane;
+    }
+
+    private GridPane buildProjectScreenPane( final String projectName, final Iterable<Object> buildsInScreen, final int nbColums, final int byColums ) {
+        final GridPane screenPane = buildCommonScreenPane();
+
+        final Iterable<List<Object>> partition = Iterables.paddedPartition( buildsInScreen, byColums );
+        createTitleBar( screenPane, projectName, nbColums, byColums + 1 );
+        for ( int x = 0; x < nbColums; x++ ) {
+            final List<Object> buildList = x < size( partition ) ? Iterables.get( partition, x ) : Collections.emptyList( );
+            for ( int y = 0; y < byColums; y++ ) {
+                if ( buildList.isEmpty( ) ) {
+                    createEmptyTile( screenPane, x, y + 1, nbColums, byColums + 1 );
+                    continue;
+                }
+
+                final Object build = Iterables.get( buildList, y );
+                if ( build == null )
+                    createEmptyTile( screenPane, x, y + 1, nbColums, byColums + 1 );
+                else
+                    createTileFromModel( screenPane, build, x, y + 1, nbColums, byColums + 1 );
+            }
+        }
+
+        return screenPane;
+    }
+
+    private void createTitleBar( final GridPane screenPane, final String title, final int nbColumns, final int nbRows ) {
+        final Pane tile = new TitleView( title, _model.getViewConfig() );
+        tile.prefWidthProperty( ).bind( widthProperty( ).add( -( ( nbColumns + 1 ) * GAP_SPACE ) / nbColumns ) );
+        tile.prefHeightProperty( ).bind( heightProperty( ).add( -( nbRows + 1 ) * GAP_SPACE ).divide( nbRows ) );
+        tile.setMinSize( USE_PREF_SIZE, USE_PREF_SIZE );
+        tile.setMaxSize( USE_PREF_SIZE, USE_PREF_SIZE );
+        screenPane.add( tile, 0, 0, nbColumns, 1 );
     }
 
     private void createEmptyTile( final GridPane screenPane, final int x, final int y, final int nbColumns, final int nbRows ) {
