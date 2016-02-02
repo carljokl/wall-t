@@ -24,8 +24,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import utils.teamcity.wallt.model.build.BuildTypeData;
 import utils.teamcity.wallt.model.build.IBuildTypeManager;
 import utils.teamcity.wallt.model.build.IProjectManager;
+import utils.teamcity.wallt.model.build.ProjectData;
 import utils.teamcity.wallt.model.configuration.Configuration;
 
 import javax.inject.Inject;
@@ -51,7 +53,9 @@ final class WallViewModel {
 
     private final BooleanProperty _projectPerWall = new SimpleBooleanProperty( );
 
-    private final ViewConfig _viewConfig = new ViewConfig( );
+    private final ViewConfig _projectTitleConfig = new ViewConfig( );
+    private final ViewConfig _tileTitleConfig = new ViewConfig( );
+    private final ViewConfig _projectTileTitleConfig = new ViewConfig( );
 
     @Inject
     WallViewModel( final EventBus eventBus, final Configuration configuration, final IBuildTypeManager buildManager, final IProjectManager projectManager, final TileViewModel.Factory tileViewModeFactory, final ProjectTileViewModel.Factory projectTileViewModeFactory ) {
@@ -63,12 +67,20 @@ final class WallViewModel {
         updateProjectList( projectManager );
     }
 
+    private TileViewModel toTileModel(final BuildTypeData buildTypeData) {
+        return _tileViewModeFactory.forBuildTypeData(_tileTitleConfig, buildTypeData);
+    }
+
+    private ProjectTileViewModel toProjectModel(final ProjectData projectData) {
+        return _projectTileViewModeFactory.forProjectData(_projectTileTitleConfig, projectData);
+    }
+
     @Subscribe
     public void updateBuildList( final IBuildTypeManager buildManager ) {
         Platform.runLater( () -> {
             _displayedBuilds.forEach( _eventBus::unregister );
             _displayedBuilds.setAll( (List<TileViewModel>) buildManager.getMonitoredBuildTypes().stream()
-                    .map( _tileViewModeFactory::forBuildTypeData )
+                    .map( this::toTileModel )
                     .collect( Collectors.toList() ) );
             _displayedBuilds.forEach( _eventBus::register );
         } );
@@ -79,7 +91,7 @@ final class WallViewModel {
         Platform.runLater( ( ) -> {
             _displayedProjects.forEach( _eventBus::unregister );
             _displayedProjects.setAll( (List<ProjectTileViewModel>) projectManager.getMonitoredProjects().stream( )
-                    .map( _projectTileViewModeFactory::forProjectData )
+                    .map( this::toProjectModel )
                     .collect( Collectors.toList( ) ) );
             _displayedProjects.forEach( _eventBus::register );
         } );
@@ -91,17 +103,17 @@ final class WallViewModel {
             _maxTilesByColumn.setValue( configuration.getMaxTilesByColumn( ) );
             _maxTilesByRow.setValue( configuration.getMaxTilesByRow() );
             _projectPerWall.setValue( configuration.isGroupByProject() );
-            _viewConfig.fontSize( ).set( configuration.getProjectTitleFontSize() );
-            _viewConfig.fontWeight( ).set( configuration.getProjectTitleFontWeight() );
+            _projectTitleConfig.fontSize().set( configuration.getProjectTitleFontSize() );
+            _projectTitleConfig.fontWeight().set( configuration.getProjectTitleFontWeight() );
+            _tileTitleConfig.fontSize().set( configuration.getTileTitleFontSize() );
+            _tileTitleConfig.fontWeight().set( configuration.getTileTitleFontWeight() );
+            _projectTileTitleConfig.fontSize().set( configuration.getProjectTileTitleFontSize() );
+            _projectTileTitleConfig.fontWeight().set( configuration.getProjectTileTitleFontWeight() );
         } );
     }
 
     public ObservableList<TileViewModel> getDisplayedBuilds( ) {
         return _displayedBuilds;
-    }
-
-    public ViewConfig getViewConfig() {
-        return _viewConfig;
     }
 
     ObservableList<ProjectTileViewModel> getDisplayedProjects( ) {
@@ -117,6 +129,18 @@ final class WallViewModel {
     }
 
     public BooleanProperty isProjectPerWallProperty( ) { return _projectPerWall; }
+
+    public ViewConfig getTitleConfig( ) {
+        return _projectTitleConfig;
+    }
+
+    public ViewConfig getTileConfig( ) {
+        return _tileTitleConfig;
+    }
+
+    public ViewConfig getProjectTileConfig( ) {
+        return _projectTileTitleConfig;
+    }
 
     @Inject
     public void registerToEventBus( final EventBus eventBus ) {

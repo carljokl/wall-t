@@ -15,7 +15,6 @@
 
 package utils.teamcity.wallt.view.wall;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -29,6 +28,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
 import javax.inject.Inject;
+import javax.swing.text.View;
 import java.util.*;
 
 import static com.google.common.collect.Iterables.size;
@@ -54,13 +54,17 @@ final class WallView extends StackPane {
         _nodeFromModelFactory = nodeFromModelFactory;
         setStyle( "-fx-background-color:black;" );
 
-        _model.getDisplayedBuilds( ).addListener( (ListChangeListener<TileViewModel>) c -> updateLayout( ) );
-        _model.getDisplayedProjects( ).addListener( (ListChangeListener<ProjectTileViewModel>) c -> updateLayout( ) );
+        _model.getDisplayedBuilds( ).addListener( (ListChangeListener<TileViewModel>) c -> updateLayout() );
+        _model.getDisplayedProjects().addListener( (ListChangeListener<ProjectTileViewModel>) c -> updateLayout( ) );
 
-        _model.getMaxTilesByColumnProperty( ).addListener( ( o, oldValue, newalue ) -> updateLayout( ) );
-        _model.getMaxTilesByRowProperty( ).addListener( ( o, oldValue, newalue ) -> updateLayout( ) );
+        _model.getMaxTilesByColumnProperty().addListener( ( o, oldValue, newalue ) -> updateLayout( ) );
+        _model.getMaxTilesByRowProperty().addListener( ( o, oldValue, newalue ) -> updateLayout( ) );
 
-        _model.isProjectPerWallProperty( ).addListener( ( o, oldValue, newValue ) -> updateLayout() );
+        _model.isProjectPerWallProperty().addListener( ( o, oldValue, newValue ) -> updateLayout( ) );
+
+        bindViewConfig( _model.getTileConfig() );
+        bindViewConfig( _model.getProjectTileConfig());
+        bindViewConfig( _model.getTitleConfig() );
 
         final Timer screenAnimationTimer = new Timer( "WallView Screen switcher", true );
         screenAnimationTimer.scheduleAtFixedRate( new TimerTask( ) {
@@ -69,6 +73,11 @@ final class WallView extends StackPane {
                 Platform.runLater( ( ) -> displayNextScreen( ) );
             }
         }, 10000, 10000 );
+    }
+
+    private void bindViewConfig(final ViewConfig config) {
+        config.fontSize( ).addListener( ( o, oldValue, newValue) -> updateLayout( ) );
+        config.fontWeight( ).addListener( ( o, oldValue, newValue ) -> updateLayout( ) );
     }
 
     private void displayNextScreen( ) {
@@ -213,7 +222,7 @@ final class WallView extends StackPane {
     }
 
     private void createTitleBar( final GridPane screenPane, final String title, final int nbColumns, final int nbRows ) {
-        final Pane tile = new TitleView( title, _model.getViewConfig() );
+        final Pane tile = new TitleView( title, _model.getTitleConfig() );
         tile.prefWidthProperty( ).bind( widthProperty( ).add( -( ( nbColumns + 1 ) * GAP_SPACE ) / nbColumns ) );
         tile.prefHeightProperty( ).bind( heightProperty( ).add( -( nbRows + 1 ) * GAP_SPACE ).divide( nbRows ) );
         tile.setMinSize( USE_PREF_SIZE, USE_PREF_SIZE );

@@ -54,21 +54,16 @@ final class ProjectTileViewModel {
 
 
     interface Factory {
-        ProjectTileViewModel forProjectData( final ProjectData projectData );
+        ProjectTileViewModel forProjectData( final ViewConfig viewConfig, final ProjectData projectData );
     }
 
     @Inject
-    ProjectTileViewModel( final Configuration configuration, final IProjectManager projectManager, @Assisted final ProjectData projectData ) {
+    ProjectTileViewModel( final Configuration configuration, final IProjectManager projectManager, @Assisted final ViewConfig viewConfig, @Assisted final ProjectData projectData ) {
         _projectManager = projectManager;
         _projectData = projectData;
-        _viewConfig = toViewConfig( configuration );
+        _viewConfig = viewConfig;
         updateConfiguration( configuration );
         updateProjectViewModel( projectData );
-    }
-
-    private ViewConfig toViewConfig(Configuration configuration) {
-        return new ViewConfig(configuration.getProjectTileTitleFontSize(),
-                              configuration.getProjectTileTitleFontWeight());
     }
 
     public ViewConfig getViewConfig() {

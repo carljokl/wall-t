@@ -62,20 +62,15 @@ final class TileViewModel {
     private final ViewConfig _viewConfig;
 
     interface Factory {
-        TileViewModel forBuildTypeData( final BuildTypeData buildTypeData );
+        TileViewModel forBuildTypeData( final ViewConfig viewConfig,  final BuildTypeData buildTypeData );
     }
 
     @Inject
-    TileViewModel( final Configuration configuration, @Assisted final BuildTypeData buildTypeData ) {
+    TileViewModel( final Configuration configuration, @Assisted final ViewConfig viewConfig, @Assisted final BuildTypeData buildTypeData ) {
         _buildTypeData = buildTypeData;
-        _viewConfig = toViewConfig( configuration );
+        _viewConfig = viewConfig;
         updateConfiguration( configuration );
         updateTileViewModel( buildTypeData );
-    }
-
-    private ViewConfig toViewConfig(Configuration configuration) {
-        return new ViewConfig(configuration.getTileTitleFontSize(),
-                              configuration.getTileTitleFontWeight());
     }
 
     public ViewConfig getViewConfig() {
@@ -90,7 +85,7 @@ final class TileViewModel {
         Platform.runLater( ( ) -> {
             _displayedName.set( Strings.isNullOrEmpty( data.getAliasName( ) ) ? data.getName( ) : data.getAliasName( ) );
             _parentName.set( Strings.isNullOrEmpty( data.getProjectName() ) ? "" : data.getProjectName() );
-            _running.setValue( data.hasRunningBuild( ) );
+            _running.setValue( data.hasRunningBuild() );
             _queued.setValue( data.isQueued( ) );
 
             updateLastFinishedDate( );
@@ -104,16 +99,16 @@ final class TileViewModel {
     @Subscribe
     public void updateConfiguration( final Configuration configuration ) {
         Platform.runLater( ( ) -> {
-            _lightMode.setValue( configuration.isLightMode( ) );
+            _lightMode.setValue( configuration.isLightMode() );
             _viewConfig.fontSize( ).setValue( configuration.getTileTitleFontSize() );
-            _viewConfig.fontWeight( ).setValue( configuration.getTileTitleFontWeight( ) );
+            _viewConfig.fontWeight( ).setValue( configuration.getTileTitleFontWeight() );
         } );
     }
 
 
     private void updateTimeLeft( ) {
         final Optional<BuildData> lastBuild = _buildTypeData.getOldestBuild( BuildState.running );
-        _timeLeft.setValue( lastBuild.isPresent( ) ? lastBuild.get( ).getTimeLeft( ) : Duration.ZERO );
+        _timeLeft.setValue( lastBuild.isPresent() ? lastBuild.get().getTimeLeft() : Duration.ZERO );
     }
 
     private void updateLastFinishedDate( ) {
@@ -125,7 +120,7 @@ final class TileViewModel {
     private void updatePercentageComplete( ) {
         final Optional<BuildData> lastBuildRunning = _buildTypeData.getOldestBuild( BuildState.running );
         if ( lastBuildRunning.isPresent( ) )
-            _percentageComplete.setValue( lastBuildRunning.get( ).getPercentageComplete( ) );
+            _percentageComplete.setValue( lastBuildRunning.get().getPercentageComplete() );
     }
 
     private void updateBackground( ) {
